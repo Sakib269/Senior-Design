@@ -26,7 +26,4 @@ energy = float(input("Enter the energy in Joules: "))
 total_mass = sum(masses)
 temperature_change = energy / (total_mass * specific_heat_capacity)
 
-# Convert the temperature change from Celsius to Kelvin
-temperature_change_kelvin = temperature_change + 273.15
-
-print("The change in temperature is", temperature_change_kelvin, "K")
+print("The change in temperature is", temperature_change, "Celcius.")
