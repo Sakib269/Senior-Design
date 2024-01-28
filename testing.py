@@ -8,6 +8,7 @@ def calculate_mass():
     #specific heat capacity of platinum in J/gC
     specific_heat_platinum = 0.133
 
+    #The radii of the filament in nanometers can be user defined. Currently hard coded as the 10-25 filament
     # dimensions of the truncated cone in nanometers >> centimeters
     r1 = 12.5 * 10**(-7)
     r2 = 5 * 10**(-7)
@@ -36,10 +37,20 @@ def calculate_mass():
     total_mass = ( 2 * mass_filament) + (2* pad_mass) + mass_copper_electrode
    
     # Testing value for Qjh is 10uJ
-    Qjh = 10 * 10**(-6)
+    # Qjh = (Vreset^3 * Icc) / (3 * RR * C)
+    #Qjh is now user defined based on the Vreset and Icc values
+    Vreset = float(input("Enter Vreset value in volts: "))
+    temp = float(input("Enter Icc value in microamps: "))
+    Icc = temp * 10**(-6)
+    RR = .276
+    C = .29
+    Qjh = (Vreset**3 * Icc) / (3 * RR * C)
+    print("Qjh is: " + str(Qjh) + " Joules")
     tempC = (Qjh / (total_mass * specific_heat_copper))
 
-    print("The temperature change of the filament is: " + str(tempC) + " degrees C")
+    # Accounting for 99% heat removed by convection and thermal radiation
+    newTemp = (tempC * .01) + 22
+    print("Accounting for 99% heat removed by convection and thermal radiation, the maxiumum temperature the unheated filament and the copper electrode could reach is : " + str(newTemp) + " degrees C")
     
 
     
