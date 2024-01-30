@@ -58,8 +58,8 @@ def QJH_calc():
     # Calculate the QJh value for user defined compliance current
     F_dissipation = simpledialog.askfloat("Input", "Enter the fraction of heat dissipated by convection and thermal radiation as a decimal:")
     Icc = simpledialog.askfloat("Input", "Enter the compliance current in uA:")
+    RR = simpledialog.askfloat("Input", "Enter the Ramping Rate in V/s:")
     Icc = -(Icc * 10**(-6))
-    RR = .1
     C = .29
     Qjh = ((reset_voltage**3 * Icc) / (3 * RR * C)) * (1 - F_dissipation)
     Qjh = round(Qjh * 10**6, 2)
@@ -74,6 +74,7 @@ def QJH_calc():
     output_text.insert(tk.END, "File Name: " + os.path.basename(file_name) + "\n")
     output_text.insert(tk.END, "The compliance current is: " + str(Icc) + " uA\n")
     output_text.insert(tk.END, "The fraction of heat dissipated by convection and thermal radiation is: " + str(F_dissipation) + "\n")
+    output_text.insert(tk.END, "The ramping rate is: " + str(RR) + " V/s\n")
     output_text.insert(tk.END, "The reset voltage is: " + str(reset_voltage) + " volts\n")
     output_text.insert(tk.END, "Qjh is: " + str(Qjh) + " micro Joules\n")
 
