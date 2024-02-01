@@ -52,27 +52,27 @@ def QJH_calc():
     # find the reset voltage
     for i in range(1, len(current)):
         if current[i] > current[0]:
-            reset_voltage = voltage[i + 1]
+            reset_voltage = - (voltage[i + 1])
             break
     
     # Calculate the QJh value for user defined compliance current
     F_dissipation = simpledialog.askfloat("Input", "Enter the fraction of heat dissipated by convection and thermal radiation as a decimal:")
-    Icc = simpledialog.askfloat("Input", "Enter the compliance current in uA:")
+    # Icc = simpledialog.askfloat("Input", "Enter the compliance current in uA:")
     RR = simpledialog.askfloat("Input", "Enter the Ramping Rate in V/s:")
-    Icc = -(Icc * 10**(-6))
-    C = .29
-    Qjh = ((reset_voltage**3 * Icc) / (3 * RR * C)) * (1 - F_dissipation)
+    Ron = simpledialog.askfloat("Input", "Enter the Ron value in Ohms:")
+    # Icc = -(Icc * 10**(-6))
+    Qjh = ((reset_voltage**3 ) / (3 * RR * Ron)) * (1 - F_dissipation)
     Qjh = round(Qjh * 10**6, 2)
     # Clear the text widget
     output_text.delete(1.0, tk.END)
     # Clear the plot widget
     plt.clf()
-    Icc = round(Icc * 10**6, 2)
+    # Icc = round(Icc * 10**6, 2)
     reset_voltage = round(reset_voltage, 2)
     # Display the output in the text widget
     #display the file name
     output_text.insert(tk.END, "File Name: " + os.path.basename(file_name) + "\n")
-    output_text.insert(tk.END, "The compliance current is: " + str(Icc) + " uA\n")
+    # output_text.insert(tk.END, "The compliance current is: " + str(Icc) + " uA\n")
     output_text.insert(tk.END, "The fraction of heat dissipated by convection and thermal radiation is: " + str(F_dissipation) + "\n")
     output_text.insert(tk.END, "The ramping rate is: " + str(RR) + " V/s\n")
     output_text.insert(tk.END, "The reset voltage is: " + str(reset_voltage) + " volts\n")
