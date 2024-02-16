@@ -1,9 +1,8 @@
-# Parse Excel Data and determine the QJh value for each data point
-# QJh = (Vreset^3 * Icc) / (3 * RR * C)
-# Determine Vreset from Data
-# Pass Excel file name and Compliance current as arguments
-# def determine_QJh(file_name, Icc):
-# Open Excel file
+# Select an excel file with the voltage and current data
+# Calculate the QJh value for the user defined Ron value
+# Calculate the temperature of the copper, platinum, and silicon dioxide
+# Plot the voltage vs current data
+import math
 import tkinter as tk
 from tkinter import filedialog, simpledialog
 import matplotlib.pyplot as plt
@@ -11,13 +10,29 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import openpyxl
 import os
 
-def QJH_calc():
-    global output_text
-    global canvas
-    # Open Excel file
+def open_file():
+    global file_name
     file_name = filedialog.askopenfilename(filetypes=[('Excel Files', '*.xlsx')])
     if not file_name:
         return
+
+
+def QJH_calc():
+    global output_text
+    global canvas
+    # Constants
+    # Density of copper in g/cm^3
+    copper_density = 8.96
+    # Specific heat of copper in J/gC        
+    specific_heat_copper = 0.385
+    # specific heat capacity of platinum in J/gC
+    specific_heat_platinum = 0.134
+    # density of platinum in g/cm^3
+    platinum_density = 21.45
+    # specific heat capacity of Silcon Dioxide in J/gC
+    specific_heat_silicon_dioxide = 0.703
+    # density of silicon dioxide in g/cm^3
+    silicon_dioxide_density = 8.2
 
     wb = openpyxl.load_workbook(file_name)
     ws = wb['Sheet1']
@@ -56,46 +71,131 @@ def QJH_calc():
             break
     
     # Calculate the QJh value for user defined compliance current
-    F_dissipation = simpledialog.askfloat("Input", "Enter the fraction of heat dissipated by convection and thermal radiation as a decimal:")
-    # Icc = simpledialog.askfloat("Input", "Enter the compliance current in uA:")
-    RR = simpledialog.askfloat("Input", "Enter the Ramping Rate in V/s:")
-    Ron = simpledialog.askfloat("Input", "Enter the Ron value in Ohms:")
-    # Icc = -(Icc * 10**(-6))
-    Qjh = ((reset_voltage**3 ) / (3 * RR * Ron)) * (1 - F_dissipation)
+    f_dissipation = float(f_dissipation_entry.get())
+    RR = float(RR_entry.get())
+    Ron = float(Ron_entry.get())
+    Qjh = ((reset_voltage**3 ) / (3 * RR * Ron)) * (1 - f_dissipation)
+    
+    #The radii of the filament in nanometers can be user defined. Currently hard coded as the 10-25 filament
+    # dimensions of the truncated cone in nanometers >> centimeters
+    r1 = 12.5 * 10**(-7)
+    r2 = 5 * 10**(-7)
+    h = 25 * 10**(-7)
+
+    # Calculate volume of truncated cone in nm^3
+    # R1 is the radius of the larger base        
+    # R2 is the radius of the smaller base
+    volume_filament = (1/3) * math.pi * h * (r1**2 + r2**2 + r1*r2)
+
+    # Calculate filament mass in grams
+    mass_filament = volume_filament * copper_density
+
+    # Copper electrode consists of a single rectangle prism with two pads on the end
+    # Copper layer is 150 nm thick
+    # Pad is 100um by 100um
+    # convert to cm
+    #               100um = 100 * 10**(-4) cm, 150nm = 150 * 10**(-7) cm
+    copper_pad_volume = ((100 * 10**(-4))**2) * (150 * 10**(-7))
+    copper_pad_mass = copper_pad_volume * copper_density
+    # Calculate mass of copper electrode in grams
+    # 800um  >> 0.08 cm
+    volume_copper_electrode = .08 * (10 * 10**(-4)) * (150 * 10**(-7))
+    mass_copper_electrode = volume_copper_electrode * copper_density
+    total_mass_copper = ( 2 * mass_filament) + (2* copper_pad_mass) + mass_copper_electrode
+
+    # Platinum electrode consists of a single rectangle prism with two pads on the end
+    # Platinum layer is 50 nm thick
+    # Pad is 100um by 100um
+    plat_pad_volume = ((100 * 10**(-4))**2) * (50 * 10**(-7))
+    plat_pad_mass = plat_pad_volume * platinum_density
+    # Calculate mass of platinum electrode in grams
+    volume_platinum_electrode = .08 * (10 * 10**(-4)) * (50 * 10**(-7))
+    mass_platinum_electrode = volume_platinum_electrode * platinum_density
+    total_mass_platinum = mass_platinum_electrode + (2 * plat_pad_mass)
+
+    # silicon dioxide layer is 25 nm thick
+    # silicon dioxide is a single sheet 
+    # Calculate mass of silicon dioxide in grams
+    # Oxide is 1030um by 750um
+    volume_silicon_dioxide = (1030 * 10**(-4)) * (750 * 10**(-4)) * (25 * 10**(-7))
+    mass_silicon_dioxide = volume_silicon_dioxide * silicon_dioxide_density
+
+    # Calculate the temperature of the copper, platinum, and silicon dioxide
+    tempCopper = round((Qjh / (total_mass_copper * specific_heat_copper)), 2)
+    tempPlatinum = round((Qjh / (total_mass_platinum * specific_heat_platinum)), 2)
+    tempSiliconDioxide = round((Qjh / (mass_silicon_dioxide * specific_heat_silicon_dioxide)), 2)
     Qjh = round(Qjh * 10**6, 2)
+
     # Clear the text widget
     output_text.delete(1.0, tk.END)
+
     # Clear the plot widget
     plt.clf()
-    # Icc = round(Icc * 10**6, 2)
     reset_voltage = round(reset_voltage, 2)
+
     # Display the output in the text widget
-    #display the file name
-    output_text.insert(tk.END, "File Name: " + os.path.basename(file_name) + "\n")
-    # output_text.insert(tk.END, "The compliance current is: " + str(Icc) + " uA\n")
-    output_text.insert(tk.END, "The fraction of heat dissipated by convection and thermal radiation is: " + str(F_dissipation) + "\n")
-    output_text.insert(tk.END, "The ramping rate is: " + str(RR) + " V/s\n")
-    output_text.insert(tk.END, "The reset voltage is: " + str(reset_voltage) + " volts\n")
-    output_text.insert(tk.END, "Qjh is: " + str(Qjh) + " micro Joules\n")
+    # display the file name
+    # Concatenate all the strings
+    output_text_str = (
+        "File Name: " + os.path.basename(file_name) + "\n"
+        "The fraction of heat dissipated by convection and thermal radiation is: " + str(f_dissipation_entry.get()) + "\n"
+        "The ramping rate is: " + str(RR_entry.get()) + " V/s\n"
+        "The reset voltage is: " + str(reset_voltage) + " volts\n"
+        "Qjh is: " + str(Qjh) + " micro Joules\n"
+        "The Ron value is: " + str(Ron_entry.get()) + " Ohms\n"
+        "Accounting for heat removed by convection and thermal radiation\n"
+        "The maxiumum change in temperature the heated filament and the copper electrode could experience is : " + str(tempCopper) + " degrees C\n"
+        "The platinum electrode could experience a maximum change in temperature of: " + str(tempPlatinum) + " degrees C\n"
+        "The Silicon Dioxide layer could experience a maximum change in temperature of: " + str(tempSiliconDioxide) + " degrees C\n"
+    )
+    # Insert the result into the text widget
+    output_text.delete(1.0, tk.END)
+    output_text.insert(tk.END, output_text_str)
 
     # Plot the data
     fig, ax = plt.subplots()
     ax.plot(voltage, current)
     ax.set(xlabel='Voltage (V)', ylabel='Current (uA)', title='Voltage vs Current')
-
-    # Create a canvas that can fit the above plot
-    if 'canvas' in globals():
-        canvas.get_tk_widget().pack_forget()
+    # Create a canvas and add it to the window
     canvas = FigureCanvasTkAgg(fig, master=root)
     canvas.draw()
-    canvas.get_tk_widget().pack()
+    canvas.get_tk_widget().grid(row=5, column=0, columnspan=2)
+
 
 if __name__ == "__main__":
     root = tk.Tk()
-    button = tk.Button(root, text="Open File", command=QJH_calc)
-    button.pack()
-    # Create a text widget and pack it
-    output_text = tk.Text(root)
-    output_text.pack()
+    root.title("GUI")
+    # root.geometry("1280x720")
+    # Create label and entry widgets for user input
+    RR_label = tk.Label(root, text="Enter the Ramping Rate in V/s")
+    RR_label.grid(row=0, column=0)
+    RR_entry = tk.Entry(root, width=50)
+    RR_entry.grid(row=0, column=1)
+
+    Ron_label = tk.Label(root, text="Enter the Ron value in Ohms")
+    Ron_label.grid(row=1, column=0)
+    Ron_entry = tk.Entry(root, width=50)
+    Ron_entry.grid(row=1, column=1)
+
+    f_dissipation_label = tk.Label(root, text="Enter the fraction of heat dissipated as a decimal")
+    f_dissipation_label.grid(row=2, column=0)
+    f_dissipation_entry = tk.Entry(root, width=50)
+    f_dissipation_entry.grid(row=2, column=1)
+
+    # Create a calculate button and pack it
+    calculate_button = tk.Button(root, text="Calculate", command=QJH_calc)
+    calculate_button.grid(row=3, column=1)
+    # Create a button to open the file
+    open_button = tk.Button(root, text="Open File", command=open_file)
+    open_button.grid(row=3, column=0)
+    # Create a text widget to display the output
+    output_text = tk.Text(root, height=15, width=150)
+    output_text.grid(row=4, column=0, columnspan=2)
+    
+    # Create a canvas to display the plot
+    canvas = tk.Canvas(root)
+    canvas.grid(row=5, column=0, columnspan=2)
+    
+
     root.protocol("WM_DELETE_WINDOW", root.quit)
     root.mainloop()
