@@ -69,7 +69,9 @@ def QJH_calc():
         if current[i] > current[0]:
             reset_voltage = - (voltage[i + 1])
             break
-    
+    # Covert microamps to nanoamps for graph
+    current = [i * 10**3 for i in current]
+
     # Calculate the QJh value for user defined compliance current
     f_dissipation = float(f_dissipation_entry.get())
     RR = float(RR_entry.get())
@@ -124,6 +126,7 @@ def QJH_calc():
     tempCopper = round((Qjh / (total_mass_copper * specific_heat_copper)), 2)
     tempPlatinum = round((Qjh / (total_mass_platinum * specific_heat_platinum)), 2)
     tempSiliconDioxide = round((Qjh / (mass_silicon_dioxide * specific_heat_silicon_dioxide)), 2)
+    temp = Qjh / ((total_mass_copper * specific_heat_copper) + (total_mass_platinum * specific_heat_platinum) + (mass_silicon_dioxide * specific_heat_silicon_dioxide))
     Qjh = round(Qjh * 10**6, 2)
 
     # Clear the text widget
@@ -144,10 +147,8 @@ def QJH_calc():
         "Qjh is: " + str(Qjh) + " micro Joules\n"
         "The Ron value is: " + str(Ron_entry.get()) + " Ohms\n"
         "Accounting for heat removed by convection and thermal radiation\n"
-        "The maxiumum change in temperature the heated filament and the copper electrode could experience is : " + str(tempCopper) + " degrees C\n"
-        "The platinum electrode could experience a maximum change in temperature of: " + str(tempPlatinum) + " degrees C\n"
-        "The Silicon Dioxide layer could experience a maximum change in temperature of: " + str(tempSiliconDioxide) + " degrees C\n"
-    )
+        "the average temperature change of the device is " + str(temp) + " degrees Celsius\n"
+        )
     # Insert the result into the text widget
     output_text.delete(1.0, tk.END)
     output_text.insert(tk.END, output_text_str)
@@ -155,7 +156,7 @@ def QJH_calc():
     # Plot the data
     fig, ax = plt.subplots()
     ax.plot(voltage, current)
-    ax.set(xlabel='Voltage (V)', ylabel='Current (uA)', title='Voltage vs Current')
+    ax.set(xlabel='Voltage (V)', ylabel='Current (nA)', title='Voltage vs Current')
     # Create a canvas and add it to the window
     canvas = FigureCanvasTkAgg(fig, master=root)
     canvas.draw()
@@ -166,18 +167,19 @@ if __name__ == "__main__":
     root = tk.Tk()
     root.title("GUI")
     # root.geometry("1280x720")
+    root.configure(bg='gray14')
     # Create label and entry widgets for user input
-    RR_label = tk.Label(root, text="Enter the Ramping Rate in V/s")
+    RR_label = tk.Label(root, text="Enter the Ramping Rate in V/s", bg='gray14', fg='SpringGreen2')
     RR_label.grid(row=0, column=0)
     RR_entry = tk.Entry(root, width=50)
     RR_entry.grid(row=0, column=1)
 
-    Ron_label = tk.Label(root, text="Enter the Ron value in Ohms")
+    Ron_label = tk.Label(root, text="Enter the Ron value in Ohms", bg='gray14', fg='SpringGreen2')
     Ron_label.grid(row=1, column=0)
     Ron_entry = tk.Entry(root, width=50)
     Ron_entry.grid(row=1, column=1)
 
-    f_dissipation_label = tk.Label(root, text="Enter the fraction of heat dissipated as a decimal")
+    f_dissipation_label = tk.Label(root, text="Enter the fraction of heat dissipated as a decimal", bg='gray14', fg='SpringGreen2')
     f_dissipation_label.grid(row=2, column=0)
     f_dissipation_entry = tk.Entry(root, width=50)
     f_dissipation_entry.grid(row=2, column=1)
@@ -189,8 +191,8 @@ if __name__ == "__main__":
     open_button = tk.Button(root, text="Open File", command=open_file)
     open_button.grid(row=3, column=0)
     # Create a text widget to display the output
-    output_text = tk.Text(root, height=15, width=150)
-    output_text.grid(row=4, column=0, columnspan=2)
+    output_text = tk.Text(root, height=15, width=150, fg='SpringGreen2', bg='gray14')
+    output_text.grid(row=4, column=0, columnspan=2, )
     
     # Create a canvas to display the plot
     canvas = tk.Canvas(root)
