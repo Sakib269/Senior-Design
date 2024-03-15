@@ -14,6 +14,10 @@ def calculate_deltaT():
     specific_heat_silicon_dioxide = 0.703
     # density of silicon dioxide in g/cm^3
     silicon_dioxide_density = 8.2
+    # centimeters to nanometers, millimeters, and micrometers
+    # 1 cm = 10^7 nm
+    # 1 cm = 10^4 um
+    # 1 cm = 10 mm
 
     # Calculate the QJh value for user defined compliance current
     f_dissipation = float(input ("Please enter the dissipation factor: "))
