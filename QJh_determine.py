@@ -9,16 +9,9 @@ from tkinter.filedialog import askopenfilename
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import openpyxl
+from openpyxl import Workbook
+from openpyxl.drawing.image import Image
 import os
-import pandas as pd
-
-
-def open_file():
-    global file_name
-    file_name = filedialog.askopenfilename(filetypes=[('Excel Files', '*.xlsx')])
-    if not file_name:
-        return
-
 
 def QJH_calc():
     global output_text
@@ -146,9 +139,13 @@ def QJH_calc():
     # display the file name
     # Concatenate all the strings
     if 'file_name' in globals():
-        file_name_str =  "File: " + os.path.basename(file_name) 
+        if use_input_voltage.get():
+            file_name_str = "File: No file selected"
+        else:
+            file_name_str =  "File: " + os.path.basename(file_name)
     else:
-        file_name_str = "No file selected"
+        file_name_str = "File: " + "No file selected"
+    
     output_text_str = (
         file_name_str + "\n"
         "The fraction of heat dissipated by convection and thermal radiation is: " + str(f_dissipation_entry.get()) + "\n"
