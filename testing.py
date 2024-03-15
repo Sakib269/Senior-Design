@@ -1,6 +1,7 @@
 import math
 
 def calculate_deltaT():
+    # Constants
     # Density of copper in g/cm^3
     copper_density = 8.96
     # Specific heat of copper in J/gC        
@@ -14,6 +15,13 @@ def calculate_deltaT():
     # density of silicon dioxide in g/cm^3
     silicon_dioxide_density = 8.2
 
+    # Calculate the QJh value for user defined compliance current
+    f_dissipation = float(input ("Please enter the dissipation factor: "))
+    RR = float(input ("Please enter the ramping rate: "))
+    Ron = float(input ("Please enter the resistance: "))
+    reset_voltage = float(input ("Please enter the reset voltage: "))
+    Qjh = ((reset_voltage**3 ) / (3 * RR * Ron)) * (1 - f_dissipation)
+    
     #The radii of the filament in nanometers can be user defined. Currently hard coded as the 10-25 filament
     # dimensions of the truncated cone in nanometers >> centimeters
     r1 = 12.5 * 10**(-7)
@@ -55,22 +63,25 @@ def calculate_deltaT():
     # silicon dioxide is a single sheet 
     # Calculate mass of silicon dioxide in grams
     # Oxide is 1030um by 750um
-    volume_silicon_dioxide = (1030 * 10**(-4)) * (750 * 10**(-4)) * (25 * 10**(-7))
+    volume_silicon_dioxide = (10 * 10**(-4)) * (10 * 10**(-4)) * (25 * 10**(-7))
     mass_silicon_dioxide = volume_silicon_dioxide * silicon_dioxide_density
-    
-    Qjh = float(input("Enter the Qjh value in microJoules: "))
-    Qjh = Qjh * 10**(-6)
-    tempCopper = round((Qjh / (total_mass_copper * specific_heat_copper)), 2)
-    tempPlatinum = round((Qjh / (total_mass_platinum * specific_heat_platinum)), 2)
-    tempSiliconDioxide = round((Qjh / (mass_silicon_dioxide * specific_heat_silicon_dioxide)), 2)
-        
 
-    Qjh = round(Qjh * 10**6, 2)
-    # DISPLAY THESE RESULTS IN GUI
-    print("Qjh is: " + str(Qjh) + " micro Joules")
-    print("Accounting for heat removed by convection and thermal radiation, the maxiumum change in temperature the unheated filament and the copper electrode could experience is : " + str(tempCopper) + " degrees C")
-    print("The platinum electrode could experience a maximum change in temperature of: " + str(tempPlatinum) + " degrees C")
-    print("The Silicon Dioxide layer could experience a maximum change in temperature of: " + str(tempSiliconDioxide) + " degrees C")
+    # Calculate the temperature of the copper, platinum, and silicon dioxide
+    Qst = Qjh * .1
+    temp = Qst / ((total_mass_copper * specific_heat_copper) + (total_mass_platinum * specific_heat_platinum) + (mass_silicon_dioxide * specific_heat_silicon_dioxide))
+    tempFil = Qjh / (mass_filament * specific_heat_copper)
+    Qjh = Qjh * 10**6
+    Qst = Qst * 10**6
+    temp = round(temp, 2)
+    tempFil = round(tempFil, 2)
+    mass_silicon_dioxide = mass_silicon_dioxide * 10**3
+    print("mass of silicon dioxide is: ", mass_silicon_dioxide, "kilograms")
+    print("The QJh value is: ", Qjh, "microJoules")
+    print ("Qst is : ", Qst, "microJoules")
+    print("The temperature of the copper, platinum, and silicon dioxide is: ", temp, "C")
+    print("The temperature of the filament is: ", tempFil, "C")
+
+
     
 if __name__ == "__main__":
     calculate_deltaT()

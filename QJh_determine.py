@@ -123,11 +123,10 @@ def QJH_calc():
     mass_silicon_dioxide = volume_silicon_dioxide * silicon_dioxide_density
 
     # Calculate the temperature of the copper, platinum, and silicon dioxide
-    tempCopper = round((Qjh / (total_mass_copper * specific_heat_copper)), 2)
-    tempPlatinum = round((Qjh / (total_mass_platinum * specific_heat_platinum)), 2)
-    tempSiliconDioxide = round((Qjh / (mass_silicon_dioxide * specific_heat_silicon_dioxide)), 2)
+    Qst = Qjh * .1
     temp = Qjh / ((total_mass_copper * specific_heat_copper) + (total_mass_platinum * specific_heat_platinum) + (mass_silicon_dioxide * specific_heat_silicon_dioxide))
-    Qjh = round(Qjh * 10**6, 2)
+    tempFil = Qst / (mass_filament * specific_heat_copper)
+
 
     # Clear the text widget
     output_text.delete(1.0, tk.END)
@@ -148,6 +147,9 @@ def QJH_calc():
         "The Ron value is: " + str(Ron_entry.get()) + " Ohms\n"
         "Accounting for heat removed by convection and thermal radiation\n"
         "the average temperature change of the device is " + str(temp) + " degrees Celsius\n"
+        "The temperature change of the filament is " + str(tempFil) + " degrees Celsius\n"
+        "Qst is: " + str(Qst) + " micro Joules\n"
+        "mass of the filament is: " + str(mass_filament) + " grams\n"
         )
     # Insert the result into the text widget
     output_text.delete(1.0, tk.END)
