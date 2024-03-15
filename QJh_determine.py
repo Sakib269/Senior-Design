@@ -17,6 +17,17 @@ def QJH_calc():
     global output_text
     global canvas
     global file_name
+    global reset_voltage
+    global voltage_entry
+    global RR_entry
+    global Ron_entry
+    global f_dissipation_entry
+    global use_input_voltage
+    global temp
+    global tempFil
+    global mass_filament
+    global Qjh
+    global Qst
     # Constants
     # Density of copper in g/cm^3
     copper_density = 8.96
@@ -169,6 +180,7 @@ def QJH_calc():
         fig, ax = plt.subplots()
         ax.plot(voltage, current)
         ax.set(xlabel='Voltage (V)', ylabel='Current (nA)', title='Voltage vs Current')
+        fig.savefig('plot.png')
         # Create a canvas and add it to the window
         canvas = FigureCanvasTkAgg(fig, master=root)
         canvas.draw()
@@ -176,14 +188,59 @@ def QJH_calc():
     else:
         if 'canvas' in globals():
             canvas.get_tk_widget().destroy()
-    
+def save_to_excel():
+    wb = Workbook()
+    ws = wb.active
+    # Write the output variables to the first row
+    ws.append([
+        "Fraction of heat dissipated by convection and thermal radiation",
+        "Ramping rate (V/s)",
+        "Reset voltage (volts)",
+        "Qjh (micro Joules)",
+        "Ron value (Ohms)",
+        "Average temperature change of the device (degrees Celsius)",
+        "Temperature change of the filament (degrees Celsius)",
+        "Qst (micro Joules)",
+        "Mass of the filament (grams)"
+    ])
 
+    # Write the output values to the second row
+    ws.append([
+        f_dissipation_entry.get(),
+        RR_entry.get(),
+        reset_voltage,
+        Qjh,
+        Ron_entry.get(),
+        temp,
+        tempFil,
+        Qst,
+        mass_filament
+    ])
+    if use_input_voltage.get():
+        # Insert the plot image
+        img = Image('plot.png')
+        ws.add_image(img, 'J1')
+
+    # Save the Workbook
+    export_file = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel files", "*.xlsx")])
+    if not export_file:
+        return
+    wb.save(export_file)
 
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("GUI")
-    
     root.configure(bg='gray14')
+
+    # Create a menu bar
+    menu = tk.Menu(root)
+
+    # Create a File menu and add it to the menu bar
+    filemenu = tk.Menu(menu, tearoff=0)
+    filemenu.add_command(label="Export to Excel", command=save_to_excel)
+    menu.add_cascade(label="File", menu=filemenu)
+    # Add the menu bar to the window
+    root.config(menu=menu)
     
     # Create label and entry widgets for user input
     RR_label = tk.Label(root, text="Enter the Ramping Rate in V/s", bg='gray14', fg='SpringGreen2')
@@ -221,10 +278,8 @@ if __name__ == "__main__":
     # Create a text widget to display the output
     output_text = tk.Text(root, height=15, width=150, fg='SpringGreen2', bg='gray14')
     output_text.grid(row=5, column=0, columnspan=2, )
-    
-    # Create a canvas to display the plot
-    #canvas = tk.Canvas(root)
-    #canvas.grid(row=5, column=0, columnspan=2)
+
+
     
     root.protocol("WM_DELETE_WINDOW", root.quit)
     root.mainloop()
