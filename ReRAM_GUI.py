@@ -14,7 +14,9 @@ from openpyxl.drawing.image import Image
 import os
 
 
+
 def QJH_calc():
+    global text_to_file_str
     # Constants
     # electrode distance in microns
     electrode_distance = 150 * (10**-6) # 150 um to meters
@@ -63,20 +65,39 @@ def QJH_calc():
     Q_p = round(Q_p, 5)
     DeltaQ = round(DeltaQ, 5)
     DeltaT = round(DeltaT, 2)
+    input_text_str = (
+        "I_H: " + str(I_H) + "\n" +
+        "Ron_H: " + str(Ron_H) + "\n" +
+        "I_P: " + str(I_P) + "\n" +
+        "Ron_P: " + str(Ron_P) + "\n" +
+        "Time: " + str(time) + "\n" +  
+        "Width: " + str(width) + "\n" +
+        "Filament Order: " + str(filament_order) + "\n"
+    )
     # Concatenate all the strings
     output_text_str = (
-        "The calculated Q_h is: " + str(Q_h) + "\n" +
-        "The calculated Q_p is: " + str(Q_p) + "\n" +
-        "The calculated DeltaQ is: " + str(DeltaQ) + "\n" +
         "The selected material is: " + str(eletrode_material) + "\n" +
         "DeltaT: " + str(DeltaT) + "\n" 
         )
+    # combine the input and output strings
+    text_to_file_str = (input_text_str + "\n" + output_text_str)
     # Create a text widget to display the output
     output_text = tk.Text(root, width=35, height=15, wrap=tk.WORD, bg='gray14', fg='SpringGreen2')
     output_text.grid(row=10, column=0, columnspan=2)
     # Insert the result into the text widget
     output_text.delete(1.0, tk.END)
     output_text.insert(tk.END, output_text_str)
+
+def save_to_file():
+    global text_to_file_str
+    # Get the filename to save the text to
+    file_name = filedialog.asksaveasfilename(filetypes=[("Text files", "*.txt")])
+    if file_name:
+        # Ensure the file has a .txt extension
+        if not file_name.endswith('.txt'):
+            file_name += '.txt'
+        with open(file_name, "w") as file:
+            file.write(text_to_file_str)
 
 def Graph_from_Excel():
     file_name = askopenfilename(filetypes=[("Excel files", "*.xlsx *.xls")])
@@ -158,6 +179,8 @@ if __name__ == "__main__":
     menubar.add_cascade(label="File", menu=file_menu)
     # Add a command to plot the voltage vs current data
     file_menu.add_command(label="Plot From Excel", command=Graph_from_Excel)
+    # Add a command to save the output to a file
+    file_menu.add_command(label="Save Output", command=save_to_file)
 
     # Create label and entry for the I_H value
     I_H_label = tk.Label(root, text="I_H (microamps)", bg='black', fg='SpringGreen2')
