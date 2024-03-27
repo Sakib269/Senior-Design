@@ -4,7 +4,7 @@
 # Plot the voltage vs current data
 import math
 import tkinter as tk
-from tkinter import filedialog, simpledialog, BooleanVar
+from tkinter import filedialog, simpledialog, BooleanVar, ttk
 from tkinter.filedialog import askopenfilename
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -14,9 +14,13 @@ from openpyxl.drawing.image import Image
 import os
 
 
-
 def QJH_calc():
     global text_to_file_str
+    global selected_current_IH_factor
+    global selected_current_IP_factor
+    global selected_resistance_RonH_factor
+    global selected_resistance_RonP_factor
+    # ... rest of the function ...
     # Constants
     # electrode distance in microns
     electrode_distance = 150 * (10**-6) # 150 um to meters
@@ -27,14 +31,24 @@ def QJH_calc():
     if Copper_electrode.get() and Platinum_electrode.get():
         tk.messagebox.showerror("Error", "Both Copper and Platinum electrodes cannot be selected at the same time.")
         return
+    
+    
+    IH_factor = current_IH_factor[selected_current_IH_factor.get()]
+    
+    IP_factor = current_IP_factor[selected_current_IP_factor.get()]
+    
+    RonH_factor = resistance_RonH_factor[selected_resistance_RonH_factor.get()]
+    
+    RonP_factor = resistance_RonP_factor[selected_resistance_RonP_factor.get()]
+    
     # Calculate the Qjh from the new equation
     # Qjh = Q_h + Q_p
     # Get inputs for the heated probe current and the Ron value
-    I_H = (float(I_H_entry.get()) * 10**-6) # convert from microamps to amps
-    Ron_H = float(Ron_H_entry.get())
+    I_H = (float(I_H_entry.get()) * IH_factor) 
+    Ron_H = float(Ron_H_entry.get()) * RonH_factor
     # Get inputs from probing cell
-    I_P = (float(I_P_entry.get()) * 10**-6) # convert from microamps to amps
-    Ron_P = float(Ron_P_entry.get())
+    I_P = (float(I_P_entry.get()) * IP_factor) 
+    Ron_P = float(Ron_P_entry.get()) * RonP_factor
     # Get time in seconds
     time = float(time_entry.get())
     # Calculate the Q_h
@@ -82,8 +96,8 @@ def QJH_calc():
     # combine the input and output strings
     text_to_file_str = (input_text_str + "\n" + output_text_str)
     # Create a text widget to display the output
-    output_text = tk.Text(root, width=35, height=15, wrap=tk.WORD, bg='gray14', fg='SpringGreen2')
-    output_text.grid(row=10, column=0, columnspan=2)
+    output_text = tk.Text(root, width=35, height=2, wrap=tk.WORD, bg='gray14', fg='SpringGreen2')
+    output_text.grid(row=10, column=0)
     # Insert the result into the text widget
     output_text.delete(1.0, tk.END)
     output_text.insert(tk.END, output_text_str)
@@ -160,16 +174,48 @@ def Graph_from_Excel():
     canvas.get_tk_widget().grid(row=11, column=0, rowspan = 1, columnspan=2)
     # Create a text widget to display the output
     output_text = tk.Text(root, width=30, height=1, wrap=tk.WORD, bg='black', fg='deep sky blue')
-    output_text.grid(row=10, column=0, rowspan = 1, columnspan=1)
+    output_text.grid(row=10, column=1, rowspan = 1, columnspan=1)
     output_text.delete(1.0, tk.END)
     reset_voltage = round(reset_voltage, 2)
-    output_text.insert(tk.END, "The reset voltage is: " + str(reset_voltage) + "\n")
+    output_text.insert(tk.END, "The reset voltage is: " + str(reset_voltage) +" Volts" "\n")
 
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("GUI")
     root.configure(bg='black')
 
+    # Create a combobox for the current and resistance factors
+    global selected_current_IH_factor
+    current_IH_factor = {'mA': 1e-3 , 'uA': 1e-6, 'nA': 1e-9}
+    selected_current_IH_factor = tk.StringVar()
+    current_IH_dropdown = ttk.Combobox(root, textvariable=selected_current_IH_factor)
+    current_IH_dropdown.grid(row=0, column=2)
+    global selected_current_IP_factor
+    current_IP_factor = {'mA': 1e-3 , 'uA': 1e-6, 'nA': 1e-9}
+    selected_current_IP_factor = tk.StringVar()
+    current_IP_dropdown = ttk.Combobox(root, textvariable=selected_current_IP_factor)
+    current_IP_dropdown.grid(row=2, column=2)
+    global selected_resistance_RonH_factor
+    resistance_RonH_factor = {'mOhm': 1e-3, 'Ohm': 1, 'kOhm': 1e3, 'MOhm': 1e6}
+    selected_resistance_RonH_factor = tk.StringVar()
+    resistance_RonH_dropdown = ttk.Combobox(root, textvariable=selected_resistance_RonH_factor)
+    resistance_RonH_dropdown.grid(row=1, column=2)
+    global selected_resistance_RonP_factor
+    resistance_RonP_factor = {'mOhm': 1e-3, 'Ohm': 1, 'kOhm': 1e3, 'MOhm': 1e6}
+    selected_resistance_RonP_factor = tk.StringVar()
+    resistance_RonP_dropdown = ttk.Combobox(root, textvariable=selected_resistance_RonP_factor)
+    resistance_RonP_dropdown.grid(row=3, column=2)
+
+    # Set the values for the comboboxes
+    current_IH_dropdown['values'] = tuple(current_IH_factor.keys())
+    current_IH_dropdown.current(1)
+    current_IP_dropdown['values'] = tuple(current_IP_factor.keys())
+    current_IP_dropdown.current(1)
+    resistance_RonH_dropdown['values'] = tuple(resistance_RonH_factor.keys())
+    resistance_RonH_dropdown.current(1)
+    resistance_RonP_dropdown['values'] = tuple(resistance_RonP_factor.keys())
+    resistance_RonP_dropdown.current(1)
+   
     # Create a menubar
     menubar = tk.Menu(root)
     root.config(menu=menubar)
