@@ -1,7 +1,12 @@
-# Select an excel file with the voltage and current data
-# Calculate the QJh value for the user defined Ron value
-# Calculate the temperature of the copper, platinum, and silicon dioxide
-# Plot the voltage vs current data
+# Determine the Change in Temperature of the common electrode between a heated and probed cell
+# The user will input the current and resistance values for the heated and probed cell
+# The user will input the time the current is applied
+# The user will input the width of the electrode
+# The user will input the order of the filament
+# The user will select the material of the electrode
+# The user can save the output to a text file
+# plot the voltage vs current data from an excel file
+# Validate the data from ANSYS
 import math
 import tkinter as tk
 from tkinter import filedialog, simpledialog, BooleanVar, ttk
@@ -13,9 +18,8 @@ from openpyxl import Workbook
 from openpyxl.drawing.image import Image
 import os
 import pandas as pd
-import xlrd
 
-
+# Find the change in temperature of the common electrode between a heated and probed cell
 def QJH_calc():
     global text_to_file_str
     global selected_current_IH_factor
@@ -99,6 +103,7 @@ def QJH_calc():
     output_text.delete(1.0, tk.END)
     output_text.insert(tk.END, output_text_str)
 
+# Save the output to a text file
 def save_to_file():
     global text_to_file_str
     # Get the filename to save the text to
@@ -110,6 +115,7 @@ def save_to_file():
         with open(file_name, "w") as file:
             file.write(text_to_file_str)
 
+# Plot the voltage vs current data from an excel file
 def Graph_from_Excel():
     file_name = askopenfilename(filetypes=[("Excel files", "*.xlsx *.xls")])
     wb = openpyxl.load_workbook(file_name)
@@ -177,7 +183,7 @@ def Graph_from_Excel():
     output_text.insert(tk.END, "File: " + file_name + "\n" +
                        "The reset voltage is: " + str(reset_voltage) +" Volts" "\n")
     
-
+# Validate the data from ANSYS
 def Validate_from_ANSYS():
     # open system dialog to select text file
     file_path = filedialog.askopenfilename(title="Select Text File", filetypes=[("Text Files", "*.txt")])
@@ -214,7 +220,21 @@ def Validate_from_ANSYS():
     # electrode radius in meters
     electrode_radius = 10 * (10**-9) # 10 nm to meters
     # Calculate the Qjh from the new equation
-    Q = ((max_temp - room_temperature) * ((math.pi) * (electrode_radius**2)) * float(time) * thermal_conductivity_copper) / electrode_height
+    Q = ((max_temp - room_temperature) * ((math.pi) * (electrode_radius**2)) * float(max_time) * 300) / electrode_height
+    if Q < 1e-9:
+        unit = "pJ"
+        Q *= 1e12
+    elif Q < 1e-6:
+        unit = "nJ"
+        Q *= 1e9
+    elif Q < 1e-3:
+        unit = "uJ"
+        Q *= 1e6
+    elif Q < 1:
+        unit = "mJ"
+        Q *= 1e3
+    else:
+        unit = "J"
     # Resample the time values to standardized the graph display to intervals being every .25 seconds
     # Create a DataFrame from your data
     df = pd.DataFrame({
@@ -230,13 +250,13 @@ def Validate_from_ANSYS():
     df_resampled = df.resample('250ms').mean()
 
     # Display the results
-    output_text = tk.Text(root, width=40, height=5, wrap=tk.WORD, bg='gray', fg='black')
+    output_text = tk.Text(root, width=45, height=5, wrap=tk.WORD, bg='gray', fg='black')
     output_text.grid(row=11, column=1)
     output_text.delete(1.0, tk.END)
     output_text.insert(tk.END, str(file_path) + "\n" +
                        "Maximum Temperature: " + str(max_temp) + "\n" +
                        "Time of Maximum Temperature: " + str(max_time) + "\n" +
-                       "Simulated Joule Heating: " + str(round(Q, 5)) + " joules" + "\n")
+                       "Simulated Joule Heating: " + str(round(Q, 2)) + " " + unit + "\n")
     # create a canvas to display the graph
     fig, ax = plt.subplots()
     fig.patch.set_facecolor('gray')
@@ -256,9 +276,7 @@ def Validate_from_ANSYS():
     canvas.draw()
     canvas.get_tk_widget().grid(row=12, column=1)
 
-        
-   
-
+# Main function, create the GUI, buttons, and labels
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("GUI")
