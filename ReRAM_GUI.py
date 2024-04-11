@@ -97,7 +97,7 @@ def QJH_calc():
     # combine the input and output strings
     text_to_file_str = (input_text_str + "\n" + output_text_str)
     # Create a text widget to display the output
-    output_text = tk.Text(root, width=40, height=3, wrap=tk.WORD, bg='gray', fg='black')
+    output_text = tk.Text(root, width=40, height=3, wrap=tk.WORD, bg='#EEEEEE', fg='black')
     output_text.grid(row=10, column=0)
     # Insert the result into the text widget
     output_text.delete(1.0, tk.END)
@@ -158,8 +158,8 @@ def Graph_from_Excel():
     # Plot the voltage vs current data
     fig, ax = plt.subplots()
     fig, ax = plt.subplots()
-    fig.patch.set_facecolor('gray')
-    ax.set_facecolor('gray')
+    fig.patch.set_facecolor('#EEEEEE')
+    ax.set_facecolor('#EEEEEE')
     ax.spines['bottom'].set_color('darkblue')
     ax.spines['top'].set_color('darkblue') 
     ax.spines['right'].set_color('darkblue')
@@ -176,7 +176,7 @@ def Graph_from_Excel():
     canvas.draw()
     canvas.get_tk_widget().grid(row=12, column=0)
     # Create a text widget to display the output
-    output_text = tk.Text(root, width=35, height=4, wrap=tk.WORD, bg='gray', fg='black')
+    output_text = tk.Text(root, width=35, height=4, wrap=tk.WORD, bg='#EEEEEE', fg='black')
     output_text.grid(row=11, column=0)
     output_text.delete(1.0, tk.END)
     reset_voltage = round(reset_voltage, 2)
@@ -250,7 +250,7 @@ def Validate_from_ANSYS():
     df_resampled = df.resample('250ms').mean()
 
     # Display the results
-    output_text = tk.Text(root, width=45, height=5, wrap=tk.WORD, bg='gray', fg='black')
+    output_text = tk.Text(root, width=45, height=5, wrap=tk.WORD, bg='#EEEEEE', fg='black')
     output_text.grid(row=11, column=1)
     output_text.delete(1.0, tk.END)
     output_text.insert(tk.END, str(file_path) + "\n" +
@@ -259,8 +259,8 @@ def Validate_from_ANSYS():
                        "Simulated Joule Heating: " + str(round(Q, 2)) + " " + unit + "\n")
     # create a canvas to display the graph
     fig, ax = plt.subplots()
-    fig.patch.set_facecolor('gray')
-    ax.set_facecolor('gray')
+    fig.patch.set_facecolor('#EEEEEE')
+    ax.set_facecolor('#EEEEEE')
     ax.spines['bottom'].set_color('darkblue')
     ax.spines['top'].set_color('darkblue')
     ax.spines['right'].set_color('darkblue')
@@ -280,7 +280,7 @@ def Validate_from_ANSYS():
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("GUI")
-    root.configure(bg='gray')
+    root.configure(bg='#EEEEEE')
 
     # Create a combobox for the current and resistance factors
     global selected_current_IH_factor
@@ -329,43 +329,43 @@ if __name__ == "__main__":
     file_menu.add_command(label="Validate from ANSYS", command=Validate_from_ANSYS)
 
     # Create label and entry for the I_H value
-    I_H_label = tk.Label(root, text="I_H", bg='gray', fg='SpringGreen2')
+    I_H_label = tk.Label(root, text="I_H", bg='#EEEEEE', fg='black')
     I_H_label.grid(row=0, column=0)
     I_H_entry = tk.Entry(root)
     I_H_entry.grid(row=0, column=1)
 
     # Create label and entry for the Ron_H value
-    Ron_H_label = tk.Label(root, text="Ron_H ", bg='gray', fg='firebrick1')
+    Ron_H_label = tk.Label(root, text="Ron_H ", bg='#EEEEEE', fg='firebrick1')
     Ron_H_label.grid(row=1, column=0)
     Ron_H_entry = tk.Entry(root)
     Ron_H_entry.grid(row=1, column=1)
 
     # Create label and entry for the I_P value
-    I_P_label = tk.Label(root, text="I_P", bg='gray', fg='SpringGreen2')
+    I_P_label = tk.Label(root, text="I_P", bg='#EEEEEE', fg='black')
     I_P_label.grid(row=2, column=0)
     I_P_entry = tk.Entry(root)
     I_P_entry.grid(row=2, column=1)
 
     # Create label and entry for the Ron_P value
-    Ron_P_label = tk.Label(root, text="Ron_P", bg='gray', fg='firebrick1')
+    Ron_P_label = tk.Label(root, text="Ron_P", bg='#EEEEEE', fg='firebrick1')
     Ron_P_label.grid(row=3, column=0)
     Ron_P_entry = tk.Entry(root)
     Ron_P_entry.grid(row=3, column=1)
 
     # Create label and entry for the time value
-    time_label = tk.Label(root, text="Time (seconds)", bg='gray', fg='black')
+    time_label = tk.Label(root, text="Time (seconds)", bg='#EEEEEE', fg='black')
     time_label.grid(row=4, column=0)
     time_entry = tk.Entry(root)
     time_entry.grid(row=4, column=1)
 
     # Create label and entry for the width value
-    width_label = tk.Label(root, text="Width (microns)", bg='gray', fg='IndianRed1')
+    width_label = tk.Label(root, text="Width (microns)", bg='#EEEEEE', fg='IndianRed1')
     width_label.grid(row=5, column=0)
     width_entry = tk.Entry(root)
     width_entry.grid(row=5, column=1)
 
     # Create label and entry for the filament order value
-    filament_order_label = tk.Label(root, text="Filament Order", bg='gray', fg='black')
+    filament_order_label = tk.Label(root, text="Filament Order", bg='#EEEEEE', fg='black')
     filament_order_label.grid(row=6, column=0)
     filament_order_entry = tk.Entry(root)
     filament_order_entry.grid(row=6, column=1)
@@ -375,19 +375,19 @@ if __name__ == "__main__":
     Copper_electrode = BooleanVar()
     
     # Create a label and checkbutton for the Platinum electrode
-    Platinum_electrode_label = tk.Label(root, text="Platinum Electrode", bg='gray', fg='cyan2')
+    Platinum_electrode_label = tk.Label(root, text="Platinum Electrode", bg='#EEEEEE', fg='black')
     Platinum_electrode_label.grid(row=7, column=0)
-    Platinum_electrode_checkbutton = tk.Checkbutton(root, variable=Platinum_electrode, bg='gray', fg='blue')
+    Platinum_electrode_checkbutton = tk.Checkbutton(root, variable=Platinum_electrode, bg='#EEEEEE', fg='blue')
     Platinum_electrode_checkbutton.grid(row=7, column=1)
 
     # Create a label and checkbutton for the Copper electrode
-    Copper_electrode_label = tk.Label(root, text="Copper Electrode", bg='gray', fg='DarkOrange2')
+    Copper_electrode_label = tk.Label(root, text="Copper Electrode", bg='#EEEEEE', fg='DarkOrange2')
     Copper_electrode_label.grid(row=8, column=0)
-    Copper_electrode_checkbutton = tk.Checkbutton(root, variable=Copper_electrode, bg='gray', fg='blue')
+    Copper_electrode_checkbutton = tk.Checkbutton(root, variable=Copper_electrode, bg='#EEEEEE', fg='blue')
     Copper_electrode_checkbutton.grid(row=8, column=1)
 
     # Create a button to calculate the DeltaT
-    calculate_button = tk.Button(root, text="Calculate DeltaT", command=QJH_calc, bg='gray', fg='cyan2')
+    calculate_button = tk.Button(root, text="Calculate DeltaT", command=QJH_calc, bg='#EEEEEE', fg='black')
     calculate_button.grid(row=9, column=0)
 
     root.protocol("WM_DELETE_WINDOW", root.quit)
